@@ -1,5 +1,5 @@
 import React from "react"
-//import Navbar from '../Component/navbar.tsx'
+import Navbar from '../Component/navbar.tsx'
 
 type Props = {
     children: React.ReactNode
@@ -8,7 +8,7 @@ type Props = {
 function Layout(props: Props){
     return (
         <>
-            {/* <Navbar /> */}
+            <Navbar />
             <main>
                 {props.children}
             </main>

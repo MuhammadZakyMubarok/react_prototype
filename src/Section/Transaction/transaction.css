@@ -1,0 +1,132 @@
+:root{
+  --bg: #f2f4f6;
+  --card: #ffffff;
+  --text: #111827;
+  --muted: #6b7280;
+  --border: #e6e9ee;
+
+  --red: #e11d2e;
+  --green: #16a34a;
+  --green-bg: rgba(22, 163, 74, 0.12);
+
+  --radius-lg: 18px;
+  --shadow: 0 1px 0 rgba(17,24,39,.03);
+}
+
+*{ box-sizing: border-box; }
+html, body{ height: 100%; }
+
+body{
+  margin: 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.page{
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 22px 16px 40px;
+}
+
+.header{
+  margin-bottom: 16px;
+}
+
+.header__title{
+  margin: 0 0 6px;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.header__subtitle{
+  margin: 0;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.list{
+  display: grid;
+  gap: 14px;
+}
+
+/* === Transaction Card === */
+.tx-card{
+  position: relative; /* penting untuk pojok kanan atas/bawah */
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 18px 18px 18px;
+  box-shadow: var(--shadow);
+
+  min-height: 110px; /* mirip tinggi card di contoh */
+  display: flex;
+  align-items: flex-start;
+}
+
+.tx-card__left{
+  padding-right: 120px; /* ruang agar teks tidak ketabrak status/harga */
+  min-width: 0;
+}
+
+.tx-card__name{
+  margin: 0 0 10px;
+  font-size: 16px;
+  color: #6b7280;
+  line-height: 1.25;
+}
+
+.tx-card__speed{
+  margin: 0;
+  font-size: 18px;
+  color: #111827;
+}
+
+/* Status pojok kanan atas */
+.tx-card__status{
+  position: absolute;
+  top: 14px;
+  right: 14px;
+
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: var(--green-bg);
+  color: var(--green);
+  border: 1px solid rgba(22, 163, 74, 0.25);
+
+  font-weight: 800;
+  font-size: 13px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* Harga pojok kanan bawah */
+.tx-card__price{
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+
+  color: var(--red);
+  font-weight: 900;
+  font-size: 16px;
+  white-space: nowrap;
+}
+
+/* Responsive */
+@media (max-width: 520px){
+  .tx-card{
+    padding: 16px;
+    min-height: 120px;
+  }
+  .tx-card__left{
+    padding-right: 0;
+  }
+  .tx-card__status{
+    top: 12px;
+    right: 12px;
+  }
+  .tx-card__price{
+    right: 12px;
+    bottom: 12px;
+  }
+}
