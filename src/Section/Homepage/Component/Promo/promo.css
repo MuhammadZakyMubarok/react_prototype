@@ -1,5 +1,8 @@
-.promo-container{
-    border: 2px solid black;
+.promo{
+    height: 300px;
+    width: auto;
+}
+.promo img{
     height: 300px;
     width: auto;
 }

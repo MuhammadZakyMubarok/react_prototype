@@ -39,7 +39,8 @@ type Plan = {
   price_display?: string
 }
 
-const API_BASE = (import.meta as any).env?.VITE_API_BASE_URL ?? 'http://localhost:3000'
+const API_BASE =
+  (import.meta as any).env?.VITE_API_BASE_URL ?? 'http://localhost:3000'
 const AUTH_KEY = 'auth_user'
 
 function readAuthUser(): AuthUser | null {
@@ -74,24 +75,41 @@ function formatRupiah(n: number) {
   return `Rp${n.toLocaleString('id-ID')}`
 }
 
+function normalizeStatus(s: string) {
+  const t = (s ?? '').trim().toLowerCase()
+  if (t === 'selesai') return 'Selesai'
+  if (t === 'belum dibayar') return 'Belum Dibayar'
+  return s
+}
+
 export default function Transaction() {
   const [user, setUser] = useState<AuthUser | null>(() => readAuthUser())
   const [txs, setTxs] = useState<Tx[]>([])
   const [plans, setPlans] = useState<Plan[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [reloadTick, setReloadTick] = useState(0)
 
-  // kalau login/logout terjadi, halaman transaksi ikut sync
+  // sync auth (login/logout)
   useEffect(() => {
     const sync = () => setUser(readAuthUser())
     window.addEventListener('auth:changed', sync as EventListener)
     window.addEventListener('storage', sync)
+
     return () => {
       window.removeEventListener('auth:changed', sync as EventListener)
       window.removeEventListener('storage', sync)
     }
   }, [])
 
+  // listen perubahan transaksi (mis. setelah bayar dari popup)
+  useEffect(() => {
+    const onTxChanged = () => setReloadTick((t) => t + 1)
+    window.addEventListener('tx:changed', onTxChanged)
+    return () => window.removeEventListener('tx:changed', onTxChanged)
+  }, [])
+
+  // fetch transaksi + plans
   useEffect(() => {
     if (!user) {
       window.location.hash = '#signin'
@@ -142,7 +160,7 @@ export default function Transaction() {
 
     load()
     return () => controller.abort()
-  }, [user])
+  }, [user, reloadTick])
 
   const plansById = useMemo(() => {
     const map = new Map<number, Plan>()
@@ -156,7 +174,9 @@ export default function Transaction() {
     <div className="page">
       <header className="header">
         <h1 className="header__title">Transaksi</h1>
-        <p className="header__subtitle">Daftar transaksi paket yang pernah kamu beli</p>
+        <p className="header__subtitle">
+          Daftar transaksi paket yang pernah kamu beli
+        </p>
       </header>
 
       {loading && <div style={{ padding: 16 }}>Memuat transaksi...</div>}
@@ -170,36 +190,36 @@ export default function Transaction() {
             txs.map((tx) => {
               const plan = plansById.get(tx.planId)
 
-                const name = plan?.name ?? 'Paket tidak ditemukan'
-                const speed = plan?.speed ?? 0
-                const priceText =
-                    plan?.price_display ?? (plan ? formatRupiah(plan.price) : '—')
+              const name = plan?.name ?? 'Paket tidak ditemukan'
+              const speedText = plan ? `${plan.speed} Mbps` : '—'
+              const priceText = plan
+                ? plan.price_display ?? formatRupiah(plan.price)
+                : '—'
 
-                const statusNorm = (tx.status ?? '').trim().toLowerCase()
-                const isUnpaid = statusNorm === 'belum dibayar'
-                const statusText =
-                    statusNorm === 'selesai'
-                    ? 'Selesai'
-                    : statusNorm === 'belum dibayar'
-                        ? 'Belum Dibayar'
-                        : tx.status
+              const statusText = normalizeStatus(tx.status)
+              const statusNorm = (statusText ?? '').trim().toLowerCase()
+              const isUnpaid = statusNorm === 'belum dibayar'
 
-                return (
-                    <article key={tx.id} className="tx-card">
-                    <div className="tx-card__left">
-                        <p className="tx-card__name">{name}</p>
-                        <p className="tx-card__speed">
-                        <strong>{speed ? `${speed} Mbps` : '—'}</strong>
-                        </p>
-                    </div>
+              return (
+                <article key={tx.id} className="tx-card">
+                  <div className="tx-card__left">
+                    <p className="tx-card__name">{name}</p>
+                    <p className="tx-card__speed">
+                      <strong>{speedText}</strong>
+                    </p>
+                  </div>
 
-                    <div className={`tx-card__status ${isUnpaid ? 'tx-card__status--danger' : ''}`}>
-                        {statusText}
-                    </div>
+                  <div
+                    className={`tx-card__status ${
+                      isUnpaid ? 'tx-card__status--danger' : ''
+                    }`}
+                  >
+                    {statusText}
+                  </div>
 
-                    <div className="tx-card__price">{priceText}</div>
-                    </article>
-                )
+                  <div className="tx-card__price">{priceText}</div>
+                </article>
+              )
             })
           )}
         </main>

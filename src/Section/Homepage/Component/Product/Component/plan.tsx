@@ -17,9 +17,10 @@ type Props = {
   plans: PlanItem[]
   loading: boolean
   error: string
+  onSelectPlan?: (plan: PlanItem) => void
 }
 
-export default function Plan({ plans, loading, error }: Props) {
+export default function Plan({ plans, loading, error, onSelectPlan }: Props) {
   if (loading) {
     return (
       <section className="grid" aria-label="Daftar paket">
@@ -71,7 +72,17 @@ export default function Plan({ plans, loading, error }: Props) {
   return (
     <section className="grid" aria-label="Daftar paket">
       {plans.map((p) => (
-        <article key={p.id} className="plan">
+        <article
+          key={p.id}
+          className="plan"
+          role="button"
+          tabIndex={0}
+          onClick={() => onSelectPlan?.(p)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') onSelectPlan?.(p)
+          }}
+          style={{ cursor: 'pointer' }}
+        >
           <div className="plan__top">
             <div>
               <p className="plan__name">{p.name}</p>

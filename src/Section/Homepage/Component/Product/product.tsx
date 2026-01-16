@@ -7,7 +7,26 @@ import type { PackageItem } from './Component/chipsbar'
 import Plan from './Component/plan'
 import type { PlanItem } from './Component/plan'
 
+import Popup from '../../../../Component/popup'
+
 const API_BASE = (import.meta as any).env?.VITE_API_BASE_URL ?? 'http://localhost:3000'
+const AUTH_KEY = 'auth_user'
+
+type AuthUser = {
+  id: number
+  name: string
+  email: string
+}
+
+function readAuthUser(): AuthUser | null {
+  try {
+    const raw = localStorage.getItem(AUTH_KEY)
+    if (!raw) return null
+    return JSON.parse(raw) as AuthUser
+  } catch {
+    return null
+  }
+}
 
 async function fetchArray<T>(url: string, fallbackKey?: string, signal?: AbortSignal): Promise<T[]> {
   const res = await fetch(url, { signal })
@@ -19,6 +38,30 @@ async function fetchArray<T>(url: string, fallbackKey?: string, signal?: AbortSi
   return []
 }
 
+async function updateTransactionStatus(txId: number, status: string) {
+  // 1) Try PATCH
+  const patchRes = await fetch(`${API_BASE}/transactions/${txId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status }),
+  })
+
+  if (patchRes.ok) return
+
+  // 2) Fallback: GET then PUT (lebih kompatibel di beberapa setup)
+  const getRes = await fetch(`${API_BASE}/transactions/${txId}`)
+  if (!getRes.ok) throw new Error(`GET tx HTTP ${getRes.status}`)
+  const current = await getRes.json()
+
+  const putRes = await fetch(`${API_BASE}/transactions/${txId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...current, status }),
+  })
+  if (!putRes.ok) throw new Error(`PUT tx HTTP ${putRes.status}`)
+}
+
+
 function Product() {
   const [packages, setPackages] = useState<PackageItem[]>([])
   const [plans, setPlans] = useState<PlanItem[]>([])
@@ -27,6 +70,25 @@ function Product() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
+  // auth + popup state
+  const [user, setUser] = useState<AuthUser | null>(() => readAuthUser())
+  const [popupOpen, setPopupOpen] = useState(false)
+  const [txId, setTxId] = useState<number | null>(null)
+  const [payLoading, setPayLoading] = useState(false)
+  const [txCreating, setTxCreating] = useState(false)
+
+  // sync auth
+  useEffect(() => {
+    const sync = () => setUser(readAuthUser())
+    window.addEventListener('auth:changed', sync as EventListener)
+    window.addEventListener('storage', sync)
+    return () => {
+      window.removeEventListener('auth:changed', sync as EventListener)
+      window.removeEventListener('storage', sync)
+    }
+  }, [])
+
+  // load packages & plans
   useEffect(() => {
     const controller = new AbortController()
 
@@ -40,7 +102,6 @@ function Product() {
           fetchArray<any>(`${API_BASE}/plans`, 'plans', controller.signal),
         ])
 
-        // normalisasi id -> string (biar aman dari number/string mismatch)
         const pkgNorm: PackageItem[] = pkgRaw.map((p: any) => ({
           id: String(p.id),
           name: String(p.name),
@@ -57,7 +118,6 @@ function Product() {
 
         setPackages(pkgNorm)
         setPlans(planNorm)
-
         setActivePackageId((prev) => prev ?? (pkgNorm[0]?.id ?? null))
       } catch (e: any) {
         if (e?.name === 'AbortError') return
@@ -75,6 +135,86 @@ function Product() {
     if (!activePackageId) return []
     return plans.filter((p) => p.packageId === activePackageId)
   }, [plans, activePackageId])
+
+  const createTransaction = async (userId: number, planId: number) => {
+    // cari max id dulu supaya bisa set id manual (sesuai permintaan)
+    const existing = await fetchArray<any>(`${API_BASE}/transactions`, 'transactions')
+    const maxId = existing.reduce((m: number, t: any) => {
+      const v = Number(t?.id)
+      return Number.isFinite(v) ? Math.max(m, v) : m
+    }, 0)
+
+    const newTx = {
+      id: maxId + 1,
+      userId,
+      planId,
+      status: 'Belum Dibayar',
+    }
+
+    const res = await fetch(`${API_BASE}/transactions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newTx),
+    })
+
+    if (!res.ok) throw new Error(`Create tx HTTP ${res.status}`)
+    const created = await res.json()
+    return Number(created?.id ?? newTx.id)
+  }
+
+  const handleSelectPlan = async (plan: PlanItem) => {
+    // belum login -> ke signin
+    if (!user) {
+      window.location.hash = '#signin'
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+      return
+    }
+
+    if (txCreating) return
+    setTxCreating(true)
+
+    try {
+      const newId = await createTransaction(user.id, plan.id)
+      setTxId(newId)
+      setPopupOpen(true)
+    } catch (e) {
+      console.error(e)
+      // simpel: biar user tahu ada masalah
+      alert('Gagal membuat transaksi. Coba lagi.')
+    } finally {
+      setTxCreating(false)
+    }
+  }
+
+  const handleClosePopup = () => {
+    setPopupOpen(false)
+    setPayLoading(false)
+    setTxId(null)
+  }
+
+  const handlePay = async () => {
+    if (!txId) return
+
+    setPayLoading(true)
+    try {
+        await updateTransactionStatus(txId, 'Selesai')
+
+        // refresh data transaksi (kalau halaman transaksi sedang terbuka)
+        window.dispatchEvent(new Event('tx:changed'))
+
+        // tutup popup dulu
+        handleClosePopup()
+
+        // lalu arahkan ke halaman transaksi
+        window.location.hash = '#transaksi'
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+    } catch (e) {
+        console.error(e)
+        alert('Gagal memproses pembayaran. Coba lagi.')
+        setPayLoading(false)
+    }
+    }
+
 
   return (
     <div className="product">
@@ -146,13 +286,21 @@ function Product() {
           </div>
         </header>
 
-        <ChipsBar
-          packages={packages}
-          activePackageId={activePackageId}
-          onSelect={setActivePackageId}
+        <ChipsBar packages={packages} activePackageId={activePackageId} onSelect={setActivePackageId} />
+
+        <Plan
+          plans={filteredPlans}
+          loading={loading}
+          error={error}
+          onSelectPlan={handleSelectPlan}
         />
 
-        <Plan plans={filteredPlans} loading={loading} error={error} />
+        <Popup
+          open={popupOpen}
+          loading={payLoading}
+          onClose={handleClosePopup}
+          onPay={handlePay}
+        />
       </main>
     </div>
   )
