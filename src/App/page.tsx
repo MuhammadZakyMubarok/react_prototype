@@ -5,12 +5,14 @@ import Layout from './Layout.tsx'
 import Homepage from '../Section/Homepage/home.tsx'
 import Transaction from '../Section/Transaction/transaction.tsx'
 import Signin from '../Section/Loginpage/signin.tsx'
+import Signup from '../Section/Loginpage/signup.tsx'
 
-type Route = 'home' | 'transaction' | 'signin'
+type Route = 'home' | 'transaction' | 'signin' | 'signup'
 
 function routeFromHash(hash: string): Route {
   if (hash === '#transaksi') return 'transaction'
   if (hash === '#signin') return 'signin'
+  if (hash === '#signup') return 'signup'
   return 'home'
 }
 
@@ -37,6 +39,7 @@ function Page() {
     <Layout>
       {route === 'transaction' && <Transaction />}
       {route === 'signin' && <Signin />}
+      {route === 'signup' && <Signup />}
       {route === 'home' && <Homepage />}
     </Layout>
   )

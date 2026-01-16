@@ -56,7 +56,7 @@ function Signup(){
                     <button className="primary-btn" type="submit">Sign up</button>
 
                     <p className="form__foot">
-                    Already seem an access? <a href="#" className="link">log in</a>
+                    Already seem an access? <a href="#signin" className="link">Sign in</a>
                     </p>
                 </form>
                 </div>

@@ -1,4 +1,5 @@
 import './sign.css'
+import '../../Component/navbar.tsx'
 
 function Signin(){
     return(
@@ -39,7 +40,7 @@ function Signin(){
                 <button className="primary-btn" type="submit">Sign in</button>
 
                 <p className="form__foot">
-                Don't have an account? <a href="#" className="link">Sign up</a>
+                Don't have an account? <a href="#signup" className="link">Sign up</a>
                 </p>
             </form>
             </div>
