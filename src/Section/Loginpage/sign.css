@@ -6,7 +6,7 @@
   --purple-900: #0c0722;
   --purple-800: #1b0c4a;
   --purple-700: #2a1167;
-  
+
   --stroke: rgba(30, 20, 60, 0.08);
 
   --shadow-soft: 0 18px 50px rgba(20, 12, 40, 0.10);
@@ -154,7 +154,6 @@ body{
   color: rgba(30, 20, 60, 0.60);
 }
 
-/* Fields */
 .form__fields{
   display: grid;
   gap: 18px;

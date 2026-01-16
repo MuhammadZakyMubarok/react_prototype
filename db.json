@@ -1,226 +1,46 @@
 {
   "users": [
-    {
-      "id": 1,
-      "name": "Customer 1",
-      "email": "customer1@mail.com",
-      "password": "123456"
-    },
-    {
-      "id": 2,
-      "name": "Customer 2",
-      "email": "customer2@mail.com",
-      "password": "abcdef"
-    }
+    { "id": 1, "name": "Customer 1", "email": "customer1@mail.com", "password": "123456" },
+    { "id": 2, "name": "Customer 2", "email": "customer2@mail.com", "password": "abcdef" }
   ],
   "packages": [
-    {
-      "id": 1,
-      "name": "Economy",
-      "plans": [
-        {
-          "id": 1,
-          "name": "Economy A",
-          "speed": 50,
-          "price": 230000,
-          "price_display": "Rp230.000"
-        },
-        {
-          "id": 2,
-          "name": "Economy B",
-          "speed": 75,
-          "price": 270000,
-          "price_display": "Rp270.000"
-        },
-        {
-          "id": 3,
-          "name": "Economy C",
-          "speed": 100,
-          "price": 310000,
-          "price_display": "Rp310.000"
-        },
-        {
-          "id": 4,
-          "name": "Economy D",
-          "speed": 125,
-          "price": 350000,
-          "price_display": "Rp350.000"
-        }
-      ]
-    },
-    {
-      "id": 2,
-      "name": "Standard",
-      "plans": [
-        {
-          "id": 5,
-          "name": "Standard A",
-          "speed": 75,
-          "price": 260000,
-          "price_display": "Rp260.000"
-        },
-        {
-          "id": 6,
-          "name": "Standard B",
-          "speed": 100,
-          "price": 300000,
-          "price_display": "Rp300.000"
-        },
-        {
-          "id": 7,
-          "name": "Standard C",
-          "speed": 125,
-          "price": 340000,
-          "price_display": "Rp340.000"
-        },
-        {
-          "id": 8,
-          "name": "Standard D",
-          "speed": 150,
-          "price": 380000,
-          "price_display": "Rp380.000"
-        }
-      ]
-    },
-    {
-      "id": 3,
-      "name": "Superior",
-      "plans": [
-        {
-          "id": 9,
-          "name": "Superior A",
-          "speed": 100,
-          "price": 290000,
-          "price_display": "Rp290.000"
-        },
-        {
-          "id": 10,
-          "name": "Superior B",
-          "speed": 125,
-          "price": 330000,
-          "price_display": "Rp330.000"
-        },
-        {
-          "id": 11,
-          "name": "Superior C",
-          "speed": 150,
-          "price": 370000,
-          "price_display": "Rp370.000"
-        },
-        {
-          "id": 12,
-          "name": "Superior D",
-          "speed": 175,
-          "price": 410000,
-          "price_display": "Rp410.000"
-        }
-      ]
-    },
-    {
-      "id": 4,
-      "name": "Deluxe",
-      "plans": [
-        {
-          "id": 13,
-          "name": "Deluxe A",
-          "speed": 125,
-          "price": 320000,
-          "price_display": "Rp320.000"
-        },
-        {
-          "id": 14,
-          "name": "Deluxe B",
-          "speed": 150,
-          "price": 360000,
-          "price_display": "Rp360.000"
-        },
-        {
-          "id": 15,
-          "name": "Deluxe C",
-          "speed": 175,
-          "price": 400000,
-          "price_display": "Rp400.000"
-        },
-        {
-          "id": 16,
-          "name": "Deluxe D",
-          "speed": 200,
-          "price": 440000,
-          "price_display": "Rp440.000"
-        }
-      ]
-    },
-    {
-      "id": 5,
-      "name": "Premier",
-      "plans": [
-        {
-          "id": 17,
-          "name": "Premier A",
-          "speed": 150,
-          "price": 350000,
-          "price_display": "Rp350.000"
-        },
-        {
-          "id": 18,
-          "name": "Premier B",
-          "speed": 175,
-          "price": 390000,
-          "price_display": "Rp390.000"
-        },
-        {
-          "id": 19,
-          "name": "Premier C",
-          "speed": 200,
-          "price": 430000,
-          "price_display": "Rp430.000"
-        },
-        {
-          "id": 20,
-          "name": "Premier D",
-          "speed": 225,
-          "price": 470000,
-          "price_display": "Rp470.000"
-        }
-      ]
-    }
+    { "id": "economy", "name": "Economy" },
+    { "id": "standard", "name": "Standard" },
+    { "id": "superior", "name": "Superior" },
+    { "id": "deluxe", "name": "Deluxe" },
+    { "id": "premier", "name": "Premier" }
+  ],
+  "plans": [
+    { "id": 1, "packageId": "economy", "name": "Economy A", "speed": 50,  "price": 230000, "price_display": "Rp230.000" },
+    { "id": 2, "packageId": "economy", "name": "Economy B", "speed": 75,  "price": 270000, "price_display": "Rp270.000" },
+    { "id": 3, "packageId": "economy", "name": "Economy C", "speed": 100, "price": 310000, "price_display": "Rp310.000" },
+    { "id": 4, "packageId": "economy", "name": "Economy D", "speed": 125, "price": 350000, "price_display": "Rp350.000" },
+
+    { "id": 5, "packageId": "standard", "name": "Standard A", "speed": 75,  "price": 260000, "price_display": "Rp260.000" },
+    { "id": 6, "packageId": "standard", "name": "Standard B", "speed": 100, "price": 300000, "price_display": "Rp300.000" },
+    { "id": 7, "packageId": "standard", "name": "Standard C", "speed": 125, "price": 340000, "price_display": "Rp340.000" },
+    { "id": 8, "packageId": "standard", "name": "Standard D", "speed": 150, "price": 380000, "price_display": "Rp380.000" },
+
+    { "id": 9,  "packageId": "superior", "name": "Superior A", "speed": 100, "price": 290000, "price_display": "Rp290.000" },
+    { "id": 10, "packageId": "superior", "name": "Superior B", "speed": 125, "price": 330000, "price_display": "Rp330.000" },
+    { "id": 11, "packageId": "superior", "name": "Superior C", "speed": 150, "price": 370000, "price_display": "Rp370.000" },
+    { "id": 12, "packageId": "superior", "name": "Superior D", "speed": 175, "price": 410000, "price_display": "Rp410.000" },
+
+    { "id": 13, "packageId": "deluxe", "name": "Deluxe A", "speed": 125, "price": 320000, "price_display": "Rp320.000" },
+    { "id": 14, "packageId": "deluxe", "name": "Deluxe B", "speed": 150, "price": 360000, "price_display": "Rp360.000" },
+    { "id": 15, "packageId": "deluxe", "name": "Deluxe C", "speed": 175, "price": 400000, "price_display": "Rp400.000" },
+    { "id": 16, "packageId": "deluxe", "name": "Deluxe D", "speed": 200, "price": 440000, "price_display": "Rp440.000" },
+
+    { "id": 17, "packageId": "premier", "name": "Premier A", "speed": 150, "price": 350000, "price_display": "Rp350.000" },
+    { "id": 18, "packageId": "premier", "name": "Premier B", "speed": 175, "price": 390000, "price_display": "Rp390.000" },
+    { "id": 19, "packageId": "premier", "name": "Premier C", "speed": 200, "price": 430000, "price_display": "Rp430.000" },
+    { "id": 20, "packageId": "premier", "name": "Premier D", "speed": 225, "price": 470000, "price_display": "Rp470.000" }
   ],
   "transactions": [
-    {
-      "id": 1,
-      "userId": 1,
-      "planId": 3,
-      "planName": "Economy C",
-      "speed": 100,
-      "price": 310000,
-      "status": "selesai"
-    },
-    {
-      "id": 2,
-      "userId": 1,
-      "planId": 7,
-      "planName": "Standard C",
-      "speed": 125,
-      "price": 340000,
-      "status": "belum bayar"
-    },
-    {
-      "id": 3,
-      "userId": 2,
-      "planId": 16,
-      "planName": "Deluxe D",
-      "speed": 200,
-      "price": 440000,
-      "status": "selesai"
-    },
-    {
-      "id": 4,
-      "userId": 2,
-      "planId": 19,
-      "planName": "Premier C",
-      "speed": 200,
-      "price": 430000,
-      "status": "belum bayar"
-    }
-  ]
+  { "id": 1, "userId": 1, "planId": 3,  "status": "Selesai" },
+  { "id": 2, "userId": 1, "planId": 6,  "status": "Belum Dibayar" },
+  { "id": 3, "userId": 2, "planId": 16, "status": "Selesai" },
+  { "id": 4, "userId": 2, "planId": 10, "status": "Selesai" }
+]
+
 }

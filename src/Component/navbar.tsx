@@ -5,14 +5,35 @@ import './navbar.css'
 type NavItem = {
   key: string
   label: string
-  href: string // sementara pakai hash agar tetap di homepage
+  href: string
+}
+
+type AuthUser = {
+  id: number
+  name: string
+  email: string
 }
 
 const NAV_ITEMS: NavItem[] = [
   { key: 'beranda', label: 'Beranda', href: '#homepage' },
   { key: 'transaksi', label: 'Transaksi', href: '#transaksi' },
   { key: 'hubungi', label: 'Hubungi Kami', href: '#hubungi-kami' },
-] 
+]
+
+const AUTH_HASH = new Set(['#signin', '#signup'])
+const AUTH_KEY = 'auth_user'
+
+function readAuthUser(): AuthUser | null {
+  try {
+    const raw = localStorage.getItem(AUTH_KEY)
+    if (!raw) return null
+    const parsed = JSON.parse(raw) as AuthUser
+    if (!parsed?.name) return null
+    return parsed
+  } catch {
+    return null
+  }
+}
 
 function getActiveFromLocation(): string {
   const hash = window.location.hash
@@ -25,9 +46,10 @@ function scrollToHashTarget(hashHref: string) {
 
   const el = document.getElementById(id)
   if (el) {
-    // offset supaya tidak ketutup navbar
     const y = el.getBoundingClientRect().top + window.scrollY - 80
     window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' })
+  } else {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 }
 
@@ -37,13 +59,20 @@ function Navbar() {
     return getActiveFromLocation()
   })
 
+  const [user, setUser] = useState<AuthUser | null>(() => {
+    if (typeof window === 'undefined') return null
+    return readAuthUser()
+  })
+
   const [isVisible, setIsVisible] = useState(true)
   const [isScrolled, setIsScrolled] = useState(false)
 
   const lastScrollY = useRef(0)
   const ticking = useRef(false)
 
-  // Sync active menu dengan URL (hash / back-forward)
+  const isAuthPage = AUTH_HASH.has(activeHref)
+
+  // Sync active menu dengan URL
   useEffect(() => {
     const syncActive = () => setActiveHref(getActiveFromLocation())
     window.addEventListener('hashchange', syncActive)
@@ -52,6 +81,20 @@ function Navbar() {
     return () => {
       window.removeEventListener('hashchange', syncActive)
       window.removeEventListener('popstate', syncActive)
+    }
+  }, [])
+
+  // Sync auth user
+  useEffect(() => {
+    const syncUser = () => setUser(readAuthUser())
+
+    window.addEventListener('auth:changed', syncUser as EventListener)
+    window.addEventListener('storage', syncUser)
+    syncUser()
+
+    return () => {
+      window.removeEventListener('auth:changed', syncUser as EventListener)
+      window.removeEventListener('storage', syncUser)
     }
   }, [])
 
@@ -71,14 +114,12 @@ function Navbar() {
         const threshold = 6
 
         if (Math.abs(delta) >= threshold) {
-          if (delta > 0 && currentY > 80) setIsVisible(false) // scroll down
-          if (delta < 0) setIsVisible(true) // scroll up
+          if (delta > 0 && currentY > 80) setIsVisible(false)
+          if (delta < 0) setIsVisible(true)
           lastScrollY.current = currentY
         }
 
-        // selalu tampilkan ketika di paling atas
         if (currentY <= 8) setIsVisible(true)
-
         ticking.current = false
       })
     }
@@ -87,33 +128,26 @@ function Navbar() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-//   const handleNavClick =
-//     (href: string) => (e: MouseEvent<HTMLAnchorElement>) => {
-//       e.preventDefault()
-
-//       // update URL tanpa reload
-//       if (window.location.hash !== href) {
-//         window.history.pushState(null, '', href)
-//         window.dispatchEvent(new Event('hashchange'))
-//       }
-
-//       setActiveHref(href)
-//       scrollToHashTarget(href)
-//     }
-    const handleNavClick =
+  const handleNavClick =
     (href: string) => (e: MouseEvent<HTMLAnchorElement>) => {
-        e.preventDefault()
+      e.preventDefault()
 
-        if (window.location.hash !== href) {
+      if (window.location.hash !== href) {
         window.location.hash = href
-        } else {
-        // kalau klik menu yang sama, tetap bisa scroll (kalau section id ada)
-        scrollToHashTarget(href)
-        }
+      }
 
-        setActiveHref(href)
+      setActiveHref(href)
+      scrollToHashTarget(href)
     }
 
+  const handleLogout = () => {
+    localStorage.removeItem(AUTH_KEY)
+    setUser(null)
+    window.dispatchEvent(new Event('auth:changed'))
+
+    window.location.hash = '#signin'
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   return (
     <>
@@ -126,31 +160,53 @@ function Navbar() {
       >
         <div className="navbar__inner">
           <nav className="navbar__menu" aria-label="Menu utama">
-            {NAV_ITEMS.map((item) => {
-              const isActive = activeHref === item.href
-              return (
-                <a
-                  key={item.key}
-                  href={item.href}
-                  onClick={handleNavClick(item.href)}
-                  className={[
-                    'navbar__link',
-                    isActive ? 'navbar__link--active' : '',
-                  ].join(' ')}
-                >
-                  {item.label}
-                </a>
-              )
-            })}
-          </nav>
+                {(user ? NAV_ITEMS : NAV_ITEMS.filter((i) => i.key !== 'transaksi')).map(
+                    (item) => {
+                    const isActive = activeHref === item.href
+                    return (
+                        <a
+                        key={item.key}
+                        href={item.href}
+                        onClick={handleNavClick(item.href)}
+                        className={[
+                            'navbar__link',
+                            isActive ? 'navbar__link--active' : '',
+                        ].join(' ')}
+                        >
+                        {item.label}
+                        </a>
+                    )
+                    }
+                )}
+            </nav>
 
-          <div className="navbar__actions">
-            <a className="navbar__signin" href="#signin" onClick={handleNavClick('#signin')}>Sign in</a>
-          </div>
+
+          {/* kanan: hilang di halaman signin/signup */}
+          {!isAuthPage && (
+            <div className="navbar__actions">
+              {user ? (
+                <button
+                  type="button"
+                  className="navbar__signin"
+                  onClick={handleLogout}
+                  aria-label="Log out"
+                >
+                  Log out
+                </button>
+              ) : (
+                <a
+                  className="navbar__signin"
+                  href="#signin"
+                  onClick={handleNavClick('#signin')}
+                >
+                  Sign in
+                </a>
+              )}
+            </div>
+          )}
         </div>
       </header>
 
-      {/* spacer supaya konten tidak ketutup navbar yang fixed */}
       <div className="navbar__spacer" />
     </>
   )

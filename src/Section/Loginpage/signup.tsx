@@ -5,7 +5,7 @@ function Signup(){
         <main className="page">
             <section className="auth">
             <div className="auth__media" aria-label="Illustration">
-                <img src="images/astro.jpg" alt="Astronaut illustration" />
+                <img src="welcome.png" alt="illustration" />
             </div>
 
             <div className="auth__content">
